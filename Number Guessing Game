@@ -1,0 +1,71 @@
+import random
+
+
+# Define Boundaries
+lowerBound = int(input("Enter a number:  "))
+upperBound = int(input(f"Now enter a number larger than {lowerBound}:  "))
+
+# Other Conditions
+score = 100
+deductions = 20
+
+while upperBound <= lowerBound:
+    print("Please try again..")
+    upperBound = int(input(f"Now enter a number larger than {lowerBound}:  "))
+
+# Generate Mystery Number
+mysteryNum = random.randint(lowerBound,upperBound)
+
+# Acquire properties about the mystery number
+hints = []
+
+for i in range(1, mysteryNum + 1):
+    if i >= 2 and (mysteryNum % i == 0) and not (i == mysteryNum):
+        hints.append(f"Hint: The mystery number is divisible by {i}")
+
+# Welcome Interface
+ans = input("\nWelcome to Guess-a-Number V2.0! Would you like to play? (y/n):  ")
+if ans[0] == 'y' or ans[0] == 'Y':
+    print("\nVery well.  Here are the rules..")
+
+    print(f"\n1.You will begin with {score}"
+    f" points\n2. Each incorrect attempt will deduct {deductions} from your score.\n"
+    f"3. You will be given hints along the way\n4. Try to score above {score / 2} points!\n5. "
+    f"You have infinite attempts\nGood luck!! ")
+
+# User Input
+print(f"\nHere is your first hint to get you started.. The number is bounded between {[lowerBound,upperBound]}")
+attempts = 0
+numHints = len(hints)
+guess = int(input(f"Attempt #{attempts + 1}:  "))
+if guess % 2 == 0 and not mysteryNum % 2 == 0:
+    hints.append("Hint:  The mystery number is odd")
+else:
+    hints.append("Hint: The mystery number is even")
+
+while not guess == mysteryNum:
+    attempts += 1
+    score = score - deductions
+    if numHints == 0:
+        print("No hints remaining..")
+        guess = int(input(f"Attempt #{attempts + 1}:  "))
+
+    else:
+        ask_user = input(f"Would you like a hint? [{numHints} remaining] (y/n):  ")
+        if ask_user[0] == 'y' or ask_user[0] == 'Y':
+                        numHints = numHints - 1
+                        print(hints[attempts])
+                        guess = int(input(f"Attempt #{attempts + 1}:  "))
+
+                        if attempts > len(hints):
+                            guess = int(input(f"Attempt #{attempts}:  "))
+                            print(hints[attempts-1])
+        else:
+            ask_user = input(f"Attempt #{attempts + 1}:  ")
+
+# Score breakdown
+if score >= 50:
+    comment = 'Not bad'
+else:
+    comment = 'Play again!'
+print(f"Your score: {score}", f"Comments: {comment}")
