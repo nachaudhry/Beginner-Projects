@@ -1,0 +1,55 @@
+import random
+print("Welcome to Virtual Rock-Paper-Scissors")
+name = input("Enter your name:  ")
+options = ["rock", "paper", "scissors"]
+
+score_user = 0
+score_comp = 0
+
+comp_choice = options[random.randint(0,2)]
+
+
+while True:
+    random_indx = random.randint(0,2)
+    comp_choice = options[random_indx]
+
+
+
+    user_choice = input("Pick Rock, Paper, or Scissors:  ")
+
+    if user_choice.lower() == "rock" and comp_choice == "scissors":
+        print(f"\nYour choice: {user_choice}\nCPU choice: {comp_choice}\n+1 point for {name}")
+        score_user += 1
+
+    elif user_choice.lower() == "scissors" and comp_choice == "rock":
+        print(f"\nYour choice: {user_choice}\nCPU choice: {comp_choice}\n+1 point for CPU")
+        score_comp += 1
+
+    elif user_choice.lower() == "paper" and comp_choice == "scissors":
+        print(f"\nYour choice: {user_choice}\nCPU choice: {comp_choice}\n+1 point for CPU")
+        score_comp += 1
+
+    elif user_choice.lower() == "scissors" and comp_choice == "paper":
+        print(f"\nYour choice: {user_choice}\nCPU choice: {comp_choice}\n+1 point for {name}")
+        score_user += 1
+
+    elif user_choice.lower() == "rock" and comp_choice == "paper":
+        print(f"\nYour choice: {user_choice}\nCPU choice: {comp_choice}\n+1 point for CPU")
+        score_comp += 1
+
+    elif user_choice.lower() == "paper" and comp_choice == "rock":
+        print(f"\nYour choice: {user_choice}\nCPU choice: {comp_choice}\n+1 point for {name}")
+        score_user += 1
+
+    elif user_choice.lower() == comp_choice:
+        print(f"\nYour choice: {user_choice}\nCPU choice: {comp_choice}\nDraw")
+        score_user += 0
+        score_comp += 0
+    if score_user >= 2 or score_comp >= 2:
+        if score_user == score_comp:
+            print("\nIt was a draw")
+        elif score_user > score_comp:
+            print(f"\n{name} won best two out of three with {score_user} points.")
+        else:
+            print(f"\n CPU won best two out of three with {score_comp} points.")
+        break
