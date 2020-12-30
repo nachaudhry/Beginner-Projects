@@ -1,0 +1,225 @@
+import pygame
+import random
+
+pygame.init()
+
+# Window Settings
+# 500 x 500 Window Size
+win = pygame.display.set_mode((500, 500))
+pygame.display.set_caption("Asteroid Shooter")
+clock = pygame.time.Clock()
+windowSize = 500
+
+# Import Spaceship Sprite
+# Resize images as required
+ship = pygame.transform.scale(pygame.image.load('DurrrSpaceShip.png'), (64, 64))
+bg = pygame.transform.scale(pygame.image.load('preview.png'), (500, 500))
+
+
+class Health:
+    def __init__(self, health):
+        self.x = 0
+        self.y = 0
+        self.width = 50
+        self.height = 50
+        self.health = health
+        self.healthbox = (10, 10, self.health, 20)
+
+    def draw(self):
+        pygame.draw.rect(win, (0, 255, 0), self.healthbox)
+
+
+class Spaceship:
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.vel = 8
+        self.hitbox = (self.x + 30, self.y, 45, 52)
+
+    def draw(self):
+        win.blit(ship, (self.x, self.y))
+        self.hitbox = (self.x, self.y, 60, 70)
+
+
+class Asteroid:
+    asteroid_img = pygame.transform.scale(pygame.image.load('asteroid.png'), (50, 50))
+
+    def __init__(self, x, y, width, height, start, stop):
+        self.x = random.randrange(0, 500)
+        self.y = random.randrange(0, 10)
+        self.width = width
+        self.height = height
+        self.start = 0
+        self.stop = 500
+        self.path = [start, stop]
+        self.horiz_vel = random.randrange(-1, 1)
+        self.vertical_vel = random.randrange(2, 5)
+        self.spawnCount = 0
+        self.motion = False
+
+
+    def draw(self):
+        self.move()
+        win.blit(self.asteroid_img, (self.x, self.y))
+        self.hitbox = (self.x, self.y, 48, 52)
+
+    def move(self):
+        self.y = self.vertical_vel + self.y
+        self.x = self.horiz_vel + self.x
+
+
+class Laser:
+    def __init__(self, x, y, radius, color):
+        self.x = x
+        self.y = y
+        self.radius = radius
+        self.color = color
+        self.speed = 10
+
+    def draw(self):
+        pygame.draw.circle(win, self.color, (self.x, self.y), self.radius)
+
+
+player = Spaceship(0, 440, 64, 64)
+asteroids_destroyed = []
+asteroids = []
+lasers = []
+beams = []
+health = Health(100)
+
+
+def redrawGameWindow():
+    win.blit(bg, (0, 0))
+    txtDisplay = text.render("Score: " + str(len(score)), 1, (255, 0, 0))
+    win.blit(txtDisplay, (370, 10))
+    player.draw()
+    health.draw()
+    for asteroid in asteroids:
+        asteroid.draw()
+    for laser in lasers:
+        laser.draw()
+    pygame.display.update()
+
+
+fire_delay = 0
+healthstat = 100
+score = []
+text = pygame.font.SysFont('comicsans', 30, True)
+
+run = True
+
+# Initiate Main Loop
+while run:
+    clock.tick(27)
+    # Control Player's Shooting Rate
+    if fire_delay > 0:
+        fire_delay += 1
+    if fire_delay > 3:
+        fire_delay = 0
+
+    for events in pygame.event.get():
+        if events.type == pygame.QUIT:
+            run = False
+
+    for asteroid in asteroids:
+        if player.x  >= asteroid.hitbox[0] and player.x  <= asteroid.hitbox[0] + asteroid.hitbox[2]:
+            if player.y <= asteroid.hitbox[1] and player.y >= asteroid.hitbox[3] - asteroid.hitbox[1]:
+
+                dmg = 5
+                healthstat -= dmg
+                health = Health(healthstat)
+                if healthstat <= 0:
+                    pygame.init()
+                    msg = "GAME OVER"
+                    font = pygame.font.SysFont('comicsans', 60, True)
+                    screen = font.render(msg, True, (255, 0, 0))
+                    box = screen.get_rect
+                    win.blit(screen, (100, 250))
+                    pygame.display.update()
+                    pygame.time.wait(5000)
+                    run = False
+
+        if asteroid.x < 500 and asteroid.x > 0 and asteroid.y < 500 and asteroid.y > 0:
+            asteroid.x += asteroid.horiz_vel
+            asteroid.y += asteroid.vertical_vel
+
+            for laser in lasers:
+                for asteroid in asteroids:
+                    if laser.x + laser.radius >= asteroid.hitbox[0] and laser.x - laser.radius <= asteroid.hitbox[0] + \
+                            asteroid.hitbox[2]:
+                        if laser.y + laser.radius <= asteroid.hitbox[1] and laser.y - laser.radius >= asteroid.hitbox[3] - \
+                                asteroid.hitbox[1]:
+                            # lasers.pop(lasers.index(laser))
+                            # asteroids_destroyed.append(asteroids.index(asteroid)-1)
+                            asteroids.pop(asteroids.index(asteroid))
+                            score.append("1")
+                            if len(score) >= 51:
+                                pygame.init()
+                                msg = "YOU WON"
+                                font = pygame.font.SysFont('comicsans', 60, True)
+                                screen = font.render(msg, True, (0, 255, 0))
+                                box = screen.get_rect
+                                win.blit(screen, (100, 250))
+                                pygame.display.update()
+                                pygame.time.wait(5000)
+                                run = False
+
+
+        else:
+            asteroids.pop(asteroids.index(asteroid))
+
+        for laser in lasers:
+
+
+            if laser.y < 500 and laser.y > 0 and laser.x > 0 and laser.x < 500:
+                laser.y -= laser.speed
+            else:
+                lasers.pop(lasers.index(laser)-1)
+
+    keys = pygame.key.get_pressed()
+
+    if keys[pygame.K_a]:
+        if player.x <= 0:
+            player.x = 0
+        else:
+
+            player.x -= player.vel
+
+        if len(asteroids) <= 5:
+            asteroids.append(Asteroid(50, 0, 64, 64, 10, 450))
+
+    if keys[pygame.K_d]:
+        if player.x >= windowSize - player.width:
+            player.x = windowSize - player.width
+        else:
+            player.x += player.vel
+
+        if len(asteroids) <= 5:
+            asteroids.append(Asteroid(50, 0, 64, 64, 10, 450))
+
+    if keys[pygame.K_w]:
+        if player.y <= 0:
+            player.y = 0
+        else:
+            player.y -= player.vel
+        if len(asteroids) <= 5:
+            asteroids.append(Asteroid(50, 0, 64, 64, 10, 450))
+
+    if keys[pygame.K_s]:
+        if player.y >= windowSize - player.height:
+            player.y = windowSize - player.height
+        else:
+            player.y += player.vel
+        if len(asteroids) <= 5:
+            asteroids.append(Asteroid(50, 0, 64, 64, 10, 450))
+
+    if keys[pygame.K_SPACE] and fire_delay == 0:
+        if len(lasers) <= 20:
+            lasers.append(Laser(player.x + 32, player.y, 3, (255, 0, 0)))
+            fire_delay = 1
+    redrawGameWindow()
+
+
+pygame.quit()
